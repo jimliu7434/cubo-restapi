@@ -4,7 +4,6 @@ module.exports = {
         // TODO: Check STAT One by One
         // TODO: if turn to Offline => 
         // TODO:    1. Del from OnlineSet
-        // TODO:    2. Set to WarningZSet
     },
 
     SendWarning: async () => {

@@ -1,6 +1,6 @@
 module.exports = {
     GetStat: async () => {
-        // TODO: Get Heartbeat from STAT
+        // TODO: Get Heartbeat
         // TODO: Get isOnline from OnlineSet
     },
 }
