@@ -9,7 +9,7 @@ router.get('/',
                 return ctx.status = 200;
             }
             catch (error) {
-                // TODO: catch error by types
+                global.logger.error(`${error.message}`);
                 return ctx.status = 500;
             }
             

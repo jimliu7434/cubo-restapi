@@ -51,13 +51,13 @@ app.use('/devices', (require('./router/devices')).routes());
 
 
 app.listen(port, () => {
-    logger.info(`listening ${port}`);
+    global.logger.info(`listening ${port}`);
 });
 
 // init Schedule
 const scheduler = require('./controller/scheduler');
 Schedule.scheduleJob('CheckDevices', ' 0 */5 * * *', async () => {
-    await scheduler.CheckOnlineDevices();
+    await scheduler.CheckOfflineDevices();
     await scheduler.SendWarning();
 });
 
