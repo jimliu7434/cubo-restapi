@@ -31,13 +31,13 @@
     }
     ```
 
-## Docker Image Build
+## Build Docker Image
 
 ```bash
   yarn build
 ```
 
-## Docker Container Deploy
+## Deploy Docker Container
 
 ```bash
   # 可以自行指定對外 port
@@ -48,7 +48,7 @@
    jimliu/cubo-restapi:latest
 ```
 
-## Testing
+## Unit Test
 
 ```bash
   yarn test
