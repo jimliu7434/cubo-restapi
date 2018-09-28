@@ -1,6 +1,8 @@
+const Validator = require('uuid-validate');
+
 module.exports = {
     IsUUID: (toTest) => {
-        // TODO: Check deviceid is an UUID or not
-        return true;
+        // Check deviceid is an UUID or not
+        return Validator(toTest, 4);
     },
 }
