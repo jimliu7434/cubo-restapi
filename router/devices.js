@@ -11,8 +11,7 @@ router.get('/',
             catch (error) {
                 global.logger.error(`${error.message}`);
                 return ctx.status = 500;
-            }
-            
+            }   
         });
 
 module.exports = router;

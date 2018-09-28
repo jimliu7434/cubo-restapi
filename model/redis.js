@@ -12,7 +12,8 @@ class RedisModel {
      * @param {*} id 
      */
     async GetHeartbeat(id) {
-        return await this.redis.get(Key.Heartbeat(id));
+        const hb = await this.redis.get(Key.Heartbeat(id));
+        return Number(hb) || 0;
     }
 
     /**
@@ -48,7 +49,7 @@ class RedisModel {
 
     async GetWarningCount(id) {
         const cnt = await this.redis.zscore(Key.WarningSet(), id);
-        return cnt || 0;
+        return Number(cnt) || 0;
     }
 
     async IncWarningCount(id) {
@@ -73,8 +74,8 @@ class RedisModel {
         let i = 0;
         const list = keys.map(k => {
             return {
-                id: k,
-                hb: values[i++] || 0,
+                id: k.substr(Key.Heartbeat('').length),
+                hb: Number(values[i++]) || 0,
             }
         });
 
@@ -85,8 +86,8 @@ class RedisModel {
         return await this.redis.smembers(Key.OnlineSet());
     }
 
-    async GetAllWarning() {
-        const warningList = await this.redis.zrange(Key.WarningSet(), 0, -1, 'WITHSCORES');
+    async GetWarningList(scoreLowerThan = '+inf') {
+        const warningList = await this.redis.zrangebyscore(Key.WarningSet(), 0, scoreLowerThan, 'WITHSCORES');
         const rtn = [];
         const chunk = 2;
         for (let i = 0, len = warningList.length; i < len; i += chunk) {
@@ -94,7 +95,7 @@ class RedisModel {
         }
         return rtn.map(d => ({
             id: d[0],
-            cnt: d[1] || 0,
+            cnt: Number(d[1]) || 0,
         }));
     }
 }

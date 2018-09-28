@@ -7,13 +7,14 @@ module.exports = {
     GetStat: async (id) => {
         // Get Heartbeat
         // Get Stat
-        const [heartbeat, stat] = await Promise.all([
+        const [heartbeat, isonline] = await Promise.all([
             Model.GetHeartbeat(id),
             Model.GetStat(id),
         ]);
         return {
+            deviceid: id,
             heartbeat,
-            stat,
+            isonline,
         };
     },
 }

@@ -1,10 +1,14 @@
 const router = new (require('koa-router'));
 const device = require('../controller/device');
+const Check = require('../common/check');
 
 router.get('/:deviceid',
     (ctx, next) => {
-        // TODO: Check deviceid is an UUID or not
-
+        const { deviceid = '' } = ctx.params;
+        if (Check.IsUUID(deviceid))
+            return next();
+        else
+            return ctx.status = 400;
     },
     async (ctx) => {
         try {
@@ -17,7 +21,6 @@ router.get('/:deviceid',
             global.logger.error(`${error.message}`);
             return ctx.status = 500;
         }
-
     }
 );
 

@@ -1,14 +1,19 @@
 const router = new (require('koa-router'));
 const heartbeat = require('../controller/heartbeat');
+const Check = require('../common/check');
 
-router.get('/:deviceid',
+router.post('/:deviceid',
     (ctx, next) => {
-        // TODO: Check deviceid is an UUID or not
-
+        const { deviceid = '' } = ctx.params;
+        if (Check.IsUUID(deviceid))
+            return next();
+        else
+            return ctx.status = 400;
     },
     async (ctx) => {
         try {
             const { deviceid } = ctx.params;
+            global.logger.debug(`hb: ${deviceid}`);
             await heartbeat.SetStat(deviceid);
             return ctx.status = 200;
         }

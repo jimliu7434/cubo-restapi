@@ -15,7 +15,7 @@ module.exports = {
         return allHeartbeats.map(device => ({
             deviceid: device.id,
             heartbeat: device.hb,
-            isonline: onlineList.include(device.id) ? 1 : 0,
+            isonline: onlineList.includes(device.id) ? 1 : 0,
         }));
     },
 }

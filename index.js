@@ -3,6 +3,9 @@ require('winston-daily-rotate-file');
 const mkdirp = require('mkdirp');
 const Koa = require('koa');
 const Schedule = require('node-schedule');
+const Moment = require('moment');
+const Router = require('koa-router');
+const conf = require('./config/conf');
 
 // init folders
 mkdirp('./logs');
@@ -14,7 +17,7 @@ global.logger = new (winston.Logger)({
             level: ['dev', 'uat'].includes(process.env.NODE_ENV) ? 'debug' : 'info',
             colorize: true,
             timestamp() {
-                return moment().format('YYYY-MM-DD HH:mm:ss.SSS');
+                return Moment().format('YYYY-MM-DD HH:mm:ss.SSS');
             },
             json: false,
             handleExceptions: true,
@@ -22,7 +25,7 @@ global.logger = new (winston.Logger)({
         }),
         new (winston.transports.DailyRotateFile)({
             timestamp() {
-                return moment().format('YYYY-MM-DD HH:mm:ss.SSS');
+                return Moment().format('YYYY-MM-DD HH:mm:ss.SSS');
             },
             level: 'info',
             json: true,
@@ -45,10 +48,11 @@ const port = Number(process.env.WEBPORT) || 80;
 const app = new Koa();
 
 // router
-app.use('/heartbeat', (require('./router/heartbeat')).routes());
-app.use('/device', (require('./router/device')).routes());
-app.use('/devices', (require('./router/devices')).routes());
-
+const root = new Router();
+root.use('/heartbeat', (require('./router/heartbeat')).routes());
+root.use('/device', (require('./router/device')).routes());
+root.use('/devices', (require('./router/devices')).routes());
+app.use(root.routes());
 
 app.listen(port, () => {
     global.logger.info(`listening ${port}`);
@@ -56,8 +60,9 @@ app.listen(port, () => {
 
 // init Schedule
 const scheduler = require('./controller/scheduler');
-Schedule.scheduleJob('CheckDevices', ' 0 */5 * * *', async () => {
-    await scheduler.CheckOfflineDevices();
+Schedule.scheduleJob('CheckDevices', `*/${conf.checkMin} * * * *`, async () => {
+    const now = await scheduler.CheckOfflineDevices();
     await scheduler.SendWarning();
+    global.logger.info(`CheckDevices Completed at ${now}`);
 });
 

@@ -6,7 +6,7 @@ const request = require('request');
 const RequestAsync = (url, qsObj) => {
     return new Promise((resolve, reject) => {
         request({
-            method: 'POST',
+            method: 'GET',
             uri: url,
             qs: qsObj,
         }, (error, resp) => {
@@ -33,7 +33,7 @@ module.exports = {
         const deviceList = allHeartbeats.map(device => ({
             deviceid: device.id,
             heartbeat: device.hb,
-            isonline: onlineList.include(device.id) ? 1 : 0,
+            isonline: onlineList.includes(device.id) ? 1 : 0,
         }));
 
         // Check heartbeat is expired or not
@@ -43,16 +43,23 @@ module.exports = {
 
         // Del from OnlineSet
         // Set to WarningSet  
-        const ids = turnToOfflineList.map(device => device.id);
-        Model.RemFromOnlineSet(ids);
-        Model.AddToWarningSet(ids);
+        const ids = turnToOfflineList.map(device => device.deviceid);
+        global.logger.debug(`Turn to Offline:`);
+        if (ids.length > 0) {
+            Model.RemFromOnlineSet(ids);
+            Model.AddToWarningSet(ids);
 
-        global.logger.debug(`Turn to Offline: ${ids.join(',')}`);
+            for (const id of ids) {
+                global.logger.debug(id);
+            }
+        }
+
+        return now;
     },
 
     SendWarning: async () => {
-        // Get All WarningZSet
-        const warningList = await Model.GetAllWarning();
+        // Get  WarningZSet which Score lower then [conf.maxAlertTimes]
+        const warningList = await Model.GetWarningList(conf.maxAlertTimes);
 
         for (const device of warningList) {
             // Check Warning Count
@@ -74,6 +81,9 @@ module.exports = {
                 if (statusCode === 200) {
                     // Incr to WarningZSet
                     Model.IncWarningCount(device.id);
+                }
+                else {
+                    throw new Error(`Webhook resp code: ${statusCode} : ${JSON.stringify(qsObj)}`);
                 }
             }
             catch (error) {
