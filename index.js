@@ -44,7 +44,7 @@ global.logger = new (winston.Logger)({
 global.model = new (require('./model/redis'))();
 
 // init Koa
-const port = Number(process.env.WEBPORT) || 80;
+const port = 80;
 const app = new Koa();
 
 // router
