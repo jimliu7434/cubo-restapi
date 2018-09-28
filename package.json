@@ -5,6 +5,10 @@
   "repository": "https://github.com/jimliu7434/cubo-restapi.git",
   "author": "jimliu <jimliu7434@gmail.com>",
   "license": "MIT",
+  "scripts": {
+      "build": "node buildimg",
+      "test": "jest"
+  },  
   "dependencies": {
     "ioredis": "^4.0.0",
     "koa": "^2.5.3",
