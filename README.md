@@ -11,12 +11,12 @@
 ## API Return Code
 
 |API| StatusCode | Description |
-|:-|:-|:-|:-|
+|:-|:-|:-|
 |*heartbeat* | 200 |  OK |
-|| 400 | Not a legel UUID |
+| | 400 | Not a legel UUID |
 |*device* | 200 | 回傳單則 **DeviceInfo** |
-|| 204 | 查無此 deviceid 資料 |
-|| 400 | Not a legel UUID |
+| | 204 | 查無此 deviceid 資料 |
+| | 400 | Not a legel UUID |
 |*devices* | 200 |  回傳 **DeviceInfo** Array |
 
 ## Return Data
