@@ -13,7 +13,7 @@ class RedisModel {
      */
     async GetHeartbeat(id) {
         const hb = await this.redis.get(Key.Heartbeat(id));
-        return Number(hb) || 0;
+        return hb !== null ? Number(hb) : hb;
     }
 
     /**

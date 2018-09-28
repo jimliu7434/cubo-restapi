@@ -11,10 +11,16 @@ module.exports = {
             Model.GetHeartbeat(id),
             Model.GetStat(id),
         ]);
-        return {
-            deviceid: id,
-            heartbeat,
-            isonline,
-        };
+
+        if (heartbeat) {
+            return {
+                deviceid: id,
+                heartbeat,
+                isonline,
+            };
+        }
+        else {
+            return null;
+        }
     },
 }

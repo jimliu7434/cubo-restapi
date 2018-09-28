@@ -14,8 +14,13 @@ router.get('/:deviceid',
         try {
             const { deviceid } = ctx.params;
             const body = await device.GetStat(deviceid);
-            ctx.body = body;
-            return ctx.status = 200;
+            if (body === null) {
+                return ctx.status = 204;
+            }
+            else {
+                ctx.body = body;
+                return ctx.status = 200;
+            }
         }
         catch (error) {
             global.logger.error(`${error.message}`);
