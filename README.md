@@ -31,6 +31,25 @@
     }
     ```
 
+## Configuration
+
+  透過設定 [conf.js](./config/conf.js) 進行設置
+
+  ```js
+  {
+    redis: {
+        host: '127.0.0.1',        // redis host
+        port: 6379,               // redis port
+        socket_keepalive: true,   // redis keepalive or not
+    },
+    expiredSec: 120,              // 逾時多久算斷線 (in Seconds)
+    checkMin: 3,                  // 多久檢查一次是否斷線 (in Minutes)
+    maxAlertTimes: 2,             // 每次斷線最多發送幾次 Alert
+    webhook: '',                  // Alert Webhook Url
+  }
+  ```
+
+
 ## Build Docker Image
 
 ```bash
