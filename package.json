@@ -6,9 +6,9 @@
   "author": "jimliu <jimliu7434@gmail.com>",
   "license": "MIT",
   "scripts": {
-      "build": "node buildimg",
-      "test": "jest"
-  },  
+    "build": "node buildimg",
+    "test": "jest"
+  },
   "dependencies": {
     "ioredis": "^4.0.0",
     "koa": "^2.5.3",
@@ -19,5 +19,10 @@
     "request": "^2.88.0",
     "winston": "^2.4.2",
     "winston-daily-rotate-file": "^3.3.2"
+  },
+  "devDependencies": {
+    "jest": "^23.6.0",
+    "jest-extended": "^0.10.0",
+    "supertest": "^3.3.0"
   }
 }

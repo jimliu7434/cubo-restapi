@@ -54,10 +54,6 @@ root.use('/device', (require('./router/device')).routes());
 root.use('/devices', (require('./router/devices')).routes());
 app.use(root.routes());
 
-app.listen(port, () => {
-    global.logger.info(`listening ${port}`);
-});
-
 // init Schedule
 const scheduler = require('./controller/scheduler');
 Schedule.scheduleJob('CheckDevices', `*/${conf.checkMin} * * * *`, async () => {
@@ -66,3 +62,8 @@ Schedule.scheduleJob('CheckDevices', `*/${conf.checkMin} * * * *`, async () => {
     global.logger.info(`CheckDevices Completed at ${now}`);
 });
 
+module.exports = { app, model: global.model, conf } ;
+
+app.listen(port, () => {
+    global.logger.info(`listening ${port}`);
+});

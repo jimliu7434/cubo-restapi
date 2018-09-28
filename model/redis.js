@@ -7,6 +7,10 @@ class RedisModel {
         this.redis = new Redis(conf.redis);
     }
 
+    Disconnect() {
+        this.redis.disconnect();
+    }
+
     /**
      * 
      * @param {*} id 
