@@ -14,7 +14,7 @@ mkdirp('./logs');
 global.logger = new (winston.Logger)({
     transports: [
         new (winston.transports.Console)({
-            level: ['dev', 'uat'].includes(process.env.NODE_ENV) ? 'debug' : 'info',
+            level: 'debug',
             colorize: true,
             timestamp() {
                 return Moment().format('YYYY-MM-DD HH:mm:ss.SSS');
