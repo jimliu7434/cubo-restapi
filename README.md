@@ -37,6 +37,8 @@
   yarn build
 ```
 
+![png](./readme/docker-image.png)
+
 ## Deploy Docker Container
 
 ```bash
@@ -53,6 +55,14 @@
 ```bash
   yarn test
 ```
+
+![png](./readme/jest-part1.png)
+
+![png](./readme/jest-part2.png)
+
+* 因其中有一項測試為 **「經過逾時時間後，device是否正確設為 offline」**，故以 `setTimeout` 將測試項目時間拉長。 *(時間長度設為 expiredSec + checkMin )*
+  * 如需加快此項測試，可至 [./config/conf.js](./config/conf.js) 將 expiredSec 及 checkMin 設為較短的時間。
+  * 如不需測試此項，可將此項測試註解，可大幅縮短測試時間。
 
 ## DB Schema
 
