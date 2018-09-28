@@ -1,343 +1,138 @@
-const { app, model, conf } = require('../../index');
+const { app, model, conf } = require('../app');
 const request = require('supertest');
-const legalID1 = '5F14A5A8-4A7E-4386-B54F-D01649D33710';
-const legalID2 = '5F14A5A8-4A7E-4386-B54F-D01649D33710';
+const UUID4 = require('uuid/v4');
+const legalID1 = UUID4();
+const legalID2 = UUID4();
+const legalID3 = UUID4();
 const illegalID1 = 'test-device1';
 const illegalID2 = '!#$#@^$%^&^(*&^*(&^*(^%&$#%^^&#';
 
-const { 
+const {
     expiredSec,
     checkMin,
 } = conf;
 
 const testExpiredSec = expiredSec + (checkMin * 60);
 
+jest.setTimeout(testExpiredSec * 1000 + 1000);
+
 describe('testing /heartbeat', () => {
     test('Using a legal deviceid (UUID) 1', async (done) => {
-        const response = await request(app.callback()).post('/getmtkcates').send();
+        const response = await request(app.callback()).post(`/heartbeat/${legalID1}`).send();
         expect(response.statusCode).toBe(200);
-        expect(response.body).toBeArray();
-        expect(response.body).not.toBeArrayOfSize(0);
-        for (const cate of response.body) {
-            expect(cate).toContainKeys([
-                'CategoryID',
-                'Name',
-                'ClientOrder',
-                'ClientCmd',
-            ]);
-            expect(cate.CategoryID).toBeString();
-            expect(cate.Name).toBeString();
-            expect(cate.ClientOrder).toBeNumber();
-            expect(cate.ClientCmd).toBeString();
-        }
-
         done();
     });
 
     test('Using a legal deviceid (UUID) 2', async (done) => {
-        const response = await request(app.callback()).post('/getmtkcates').send();
+        const response = await request(app.callback()).post(`/heartbeat/${legalID2}`).send();
         expect(response.statusCode).toBe(200);
-        expect(response.body).toBeArray();
-        expect(response.body).not.toBeArrayOfSize(0);
-        for (const cate of response.body) {
-            expect(cate).toContainKeys([
-                'CategoryID',
-                'Name',
-                'ClientOrder',
-                'ClientCmd',
-            ]);
-            expect(cate.CategoryID).toBeString();
-            expect(cate.Name).toBeString();
-            expect(cate.ClientOrder).toBeNumber();
-            expect(cate.ClientCmd).toBeString();
-        }
-
         done();
     });
 
+    test('Using an illegal deviceid (not UUID)', async (done) => {
+        const response = await request(app.callback()).post(`/heartbeat/${illegalID1}`).send();
+        expect(response.statusCode).toBe(400);
+        done();
+    });
 
-    test('Using an illegal deviceid ', async (done) => {
-        const response = await request(app.callback()).post('/getmtkcates').send();
-        expect(response.statusCode).toBe(200);
-        expect(response.body).toBeArray();
-        expect(response.body).not.toBeArrayOfSize(0);
-        for (const cate of response.body) {
-            expect(cate).toContainKeys([
-                'CategoryID',
-                'Name',
-                'ClientOrder',
-                'ClientCmd',
-            ]);
-            expect(cate.CategoryID).toBeString();
-            expect(cate.Name).toBeString();
-            expect(cate.ClientOrder).toBeNumber();
-            expect(cate.ClientCmd).toBeString();
-        }
-
+    test('Using an illegal deviceid (special chars)', async (done) => {
+        const response = await request(app.callback()).post(`/heartbeat/${illegalID2}`).send();
+        expect(response.statusCode).toBe(400);
         done();
     });
 });
 
 describe('testing /device', () => {
-    test('Using a legal deviceid', async (done) => {
-        const response = await request(app.callback()).post('/getcates').send();
+    test('Using an Existed legal deviceid', async (done) => {
+        const response = await request(app.callback()).get(`/device/${legalID1}`).send();
         expect(response.statusCode).toBe(200);
         expect(response.body).toBeObject();
-        for (const name in response.body) {
-            const item = response.body[name];
-            expect(item).toBeObject();
-            expect(item).toContainKeys([
-                'ChannelID',
-                'Name',
-                'ChannelType',
-                'ClientOrder',
-                'IsTop',
-                'IconUpdateAt',
-                'IconUrl',
-                'Categories',
-            ]);
-            expect(item.ChannelID).toBeString();
-            expect(item.Name).toBeString();
-            expect(item.ChannelType).toBeNumber();
-            expect(item.ClientOrder).toBeNumber();
-            expect(item.IsTop).toBeNumber();
-            expect(item.IconUpdateAt).toBeDefined();
-            expect(item.IconUrl).toBeDefined();
-            expect(item.Categories).toBeArray();
-            for (const cate of item.Categories) {
-                expect(cate).toBeObject();
-                expect(cate).toContainKeys([
-                    'CategoryID',
-                    'ChannelID',
-                    'Name',
-                    'ClientOrder',
-                    'ClientCmd',
-                ]);
-            }
-        }
+        expect(response.body).toContainKeys([
+            'deviceid',
+            'heartbeat',
+            'isonline',
+        ]);
+        expect(response.body.deviceid).toBe(legalID1);
+        expect(response.body.heartbeat).not.toBe(0);
+        expect(response.body.isonline).toBe(1);
 
         done();
     });
 
-    test('Using a legal deviceid but never heartbeat', async (done) => {
-        const response = await request(app.callback()).post('/getcates').send();
-        expect(response.statusCode).toBe(200);
-        expect(response.body).toBeObject();
-        for (const name in response.body) {
-            const item = response.body[name];
-            expect(item).toBeObject();
-            expect(item).toContainKeys([
-                'ChannelID',
-                'Name',
-                'ChannelType',
-                'ClientOrder',
-                'IsTop',
-                'IconUpdateAt',
-                'IconUrl',
-                'Categories',
-            ]);
-            expect(item.ChannelID).toBeString();
-            expect(item.Name).toBeString();
-            expect(item.ChannelType).toBeNumber();
-            expect(item.ClientOrder).toBeNumber();
-            expect(item.IsTop).toBeNumber();
-            expect(item.IconUpdateAt).toBeDefined();
-            expect(item.IconUrl).toBeDefined();
-            expect(item.Categories).toBeArray();
-            for (const cate of item.Categories) {
-                expect(cate).toBeObject();
-                expect(cate).toContainKeys([
-                    'CategoryID',
-                    'ChannelID',
-                    'Name',
-                    'ClientOrder',
-                    'ClientCmd',
-                ]);
-            }
-        }
-
+    test('Using a NOT Existed legal deviceid', async (done) => {
+        const response = await request(app.callback()).get(`/device/${legalID3}`).send();
+        expect(response.statusCode).toBe(204);
         done();
     });
 
-    test('Using an illegal deviceid', async (done) => {
-        const response = await request(app.callback()).post('/getcates').send();
-        expect(response.statusCode).toBe(200);
-        expect(response.body).toBeObject();
-        for (const name in response.body) {
-            const item = response.body[name];
-            expect(item).toBeObject();
-            expect(item).toContainKeys([
-                'ChannelID',
-                'Name',
-                'ChannelType',
-                'ClientOrder',
-                'IsTop',
-                'IconUpdateAt',
-                'IconUrl',
-                'Categories',
-            ]);
-            expect(item.ChannelID).toBeString();
-            expect(item.Name).toBeString();
-            expect(item.ChannelType).toBeNumber();
-            expect(item.ClientOrder).toBeNumber();
-            expect(item.IsTop).toBeNumber();
-            expect(item.IconUpdateAt).toBeDefined();
-            expect(item.IconUrl).toBeDefined();
-            expect(item.Categories).toBeArray();
-            for (const cate of item.Categories) {
-                expect(cate).toBeObject();
-                expect(cate).toContainKeys([
-                    'CategoryID',
-                    'ChannelID',
-                    'Name',
-                    'ClientOrder',
-                    'ClientCmd',
-                ]);
-            }
-        }
+    test('Using an illegal deviceid (not UUID)', async (done) => {
+        const response = await request(app.callback()).get(`/device/${illegalID1}`).send();
+        expect(response.statusCode).toBe(400);
+        done();
+    });
 
+    test('Using an illegal deviceid (special chars)', async (done) => {
+        const response = await request(app.callback()).get(`/device/${illegalID2}`).send();
+        expect(response.statusCode).toBe(400);
         done();
     });
 });
 
 describe('testing /devices', () => {
-    test('must has 2 devices & all [online]', async (done) => {
-        const response = await request(app.callback()).post('/getnewslist').send({
-            clientCmd: "GetAllNewsList"
-        });
+    test('at least 2 devices & legalID1/2 are [online]', async (done) => {
+        const response = await request(app.callback()).get('/devices').send();
         expect(response.statusCode).toBe(200);
-        expect(response.body).toBeArray();
         expect(response.body).not.toBeArrayOfSize(0);
-        for (const news of response.body) {
-            expect(news).toContainKeys([
-                'NewsID',
-                'CategoryID',
-                'CategoryName',
-                'ChannelID',
-                'ChannelName',
-                'Url',
-                'NewsTime',
-                'Title',
-                'Description',
-                'NewsType',
-                'ViewState',
+        for (const device of response.body) {
+            expect(device).toContainKeys([
+                'deviceid',
+                'heartbeat',
+                'isonline',
             ]);
-            expect(news.NewsID).toBeString();
-            expect(news.CategoryID).toBeString();
-            expect(news.CategoryName).toBeString();
-            expect(news.ChannelID).toBeString();
-            expect(news.ChannelName).toBeString();
-            expect(news.Url).toBeString();
-            expect(news.NewsTime).toBeString();
-            expect(news.Title).toBeString();
-            expect(news.Description).toBeString();
-            expect(news.NewsID).toBeString();
-            expect(news.NewsType).toBeNumber();
-            expect(news.ViewState).toBeObject();
-            expect(news.ViewState).toContainKeys([
-                'Status',
-                'ShowStr',
-                'ShowColor',
-            ]);
-            expect(news.ViewState.Status).toBeNumber();
-            expect(news.ViewState.Status).toBeWithin(1, 4);
-            expect(news.ViewState.ShowStr).toBeString();
-            expect(news.ViewState.ShowColor).toBeString();
+            expect(device.deviceid).toBeString();
+            expect(device.heartbeat).not.toBe(0);
+            if (device.deviceid === legalID1 || device.deviceid === legalID2)
+                expect(device.isonline).toBe(1);
         }
         done();
     });
 
-    test(`after ${testExpiredSec} seconds, all devices need to be [offline]`, async (done) => {
-        const response = await request(app.callback()).post('/getnewslist').send({
-            clientCmd: "GetMtkNewsList::E1FBE42A-0DA8-4D3D-89C0-C80B49DC9CB0"
-        });
-        expect(response.statusCode).toBe(200);
-        expect(response.body).toBeArray();
-        expect(response.body).not.toBeArrayOfSize(0);
-        for (const news of response.body) {
-            expect(news).toContainKeys([
-                'NewsID',
-                'CategoryID',
-                'CategoryName',
-                'ChannelID',
-                'ChannelName',
-                'Url',
-                'NewsTime',
-                'Title',
-                'Description',
-                'NewsType',
-                'ViewState',
-            ]);
-            expect(news.NewsID).toBeString();
-            expect(news.CategoryID).toBeString();
-            expect(news.CategoryName).toBeString();
-            expect(news.ChannelID).toBeString();
-            expect(news.ChannelName).toBeString();
-            expect(news.Url).toBeString();
-            expect(news.NewsTime).toBeString();
-            expect(news.Title).toBeString();
-            expect(news.Description).toBeString();
-            expect(news.NewsID).toBeString();
-            expect(news.NewsType).toBeNumber();
-            expect(news.ViewState).toBeObject();
-            expect(news.ViewState).toContainKeys([
-                'Status',
-                'ShowStr',
-                'ShowColor',
-            ]);
-            expect(news.ViewState.Status).toBeNumber();
-            expect(news.ViewState.Status).toBeWithin(1, 4);
-            expect(news.ViewState.ShowStr).toBeString();
-            expect(news.ViewState.ShowColor).toBeString();
-        }
-        done();
+    test(`after ${testExpiredSec} seconds, legalID1/2 need to be [offline]`, async (done) => {
+        setTimeout(async () => {
+            const response = await request(app.callback()).get('/devices').send();
+            expect(response.statusCode).toBe(200);
+            expect(response.body).not.toBeArrayOfSize(0);
+            for (const device of response.body) {
+                expect(device).toContainKeys([
+                    'deviceid',
+                    'heartbeat',
+                    'isonline',
+                ]);
+                expect(device.deviceid).toBeString();
+                expect(device.heartbeat).not.toBe(0);
+                if (device.deviceid === legalID1 || device.deviceid === legalID2)
+                    expect(device.isonline).toBe(0);
+            }
+            done();
+        }, testExpiredSec * 1000);
     });
 });
 
-describe('testing: when clinets come back', () => {
+describe('testing: when clients come back', () => {
     test('original stat [offline] to [online] after heartbeat', async (done) => {
-        const response = await request(app.callback()).post('/getnewslist').send({
-            clientCmd: "GetAllNewsList"
-        });
-        expect(response.statusCode).toBe(200);
-        expect(response.body).toBeArray();
-        expect(response.body).not.toBeArrayOfSize(0);
-        for (const news of response.body) {
-            expect(news).toContainKeys([
-                'NewsID',
-                'CategoryID',
-                'CategoryName',
-                'ChannelID',
-                'ChannelName',
-                'Url',
-                'NewsTime',
-                'Title',
-                'Description',
-                'NewsType',
-                'ViewState',
-            ]);
-            expect(news.NewsID).toBeString();
-            expect(news.CategoryID).toBeString();
-            expect(news.CategoryName).toBeString();
-            expect(news.ChannelID).toBeString();
-            expect(news.ChannelName).toBeString();
-            expect(news.Url).toBeString();
-            expect(news.NewsTime).toBeString();
-            expect(news.Title).toBeString();
-            expect(news.Description).toBeString();
-            expect(news.NewsID).toBeString();
-            expect(news.NewsType).toBeNumber();
-            expect(news.ViewState).toBeObject();
-            expect(news.ViewState).toContainKeys([
-                'Status',
-                'ShowStr',
-                'ShowColor',
-            ]);
-            expect(news.ViewState.Status).toBeNumber();
-            expect(news.ViewState.Status).toBeWithin(1, 4);
-            expect(news.ViewState.ShowStr).toBeString();
-            expect(news.ViewState.ShowColor).toBeString();
-        }
+        const step1_resp = await request(app.callback()).post(`/heartbeat/${legalID1}`).send();
+        expect(step1_resp.statusCode).toBe(200);
+        const step2_resp = await request(app.callback()).get(`/device/${legalID1}`).send();
+        expect(step2_resp.statusCode).toBe(200);
+        expect(step2_resp.body).toBeObject();
+        expect(step2_resp.body).toContainKeys([
+            'deviceid',
+            'heartbeat',
+            'isonline',
+        ]);
+        expect(step2_resp.body.deviceid).toBe(legalID1);
+        expect(step2_resp.body.heartbeat).not.toBe(0);
+        expect(step2_resp.body.isonline).toBe(1);
         done();
     });
 });
